@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Assignment GIF Generator</title>
+		<style>
+			html, body, div {
+				margin:0;
+				padding:0;
+				border:0;
+				outline:0;
+				font-size:100%;
+				vertical-align:baseline;
+				background:transparent;
+			}
+			
+			html, body {
+				background-color: #DDDDDD;
+			}
+			
+			input, textarea {
+				width: 100%;
+			}
+			textarea {
+				resize: vertical;
+				font-family: Arial;
+				font-size: 0.8em;
+			}
+			
+			#container {
+				background-color: white;
+				position: absolute;
+				width: 62%;
+				right: 17%;
+				left: 17%;
+				min-height: 100%;
+				padding: 0px 2% 0px 2%;
+				font-family:Calibri, Helvetica, Arial, sans-serif;
+			}
+			
+			h1, h2, h3, h4, h5, h6 {
+				text-align: center;
+			}
+			.left {
+				text-align: left;
+			}
+			.right {
+				text-align: right;
+			}
+			
+			.hLine, .hLineB {
+				width: 100%;
+				background-color: black;
+				overflow: hidden;
+			}
+			.hLine {
+				height: 1px;
+			}
+			.hLineB {
+				height: 2px;
+			}
+			
+			.niceTable, .niceTable th, .niceTable td {
+				border: 2px solid #888888;
+				border-collapse: collapse;
+				padding: 7px;
+			}
+			.niceTable th {
+				background-color: #CCCCCC;
+			}
+			.niceTable td {
+				background-color: #EEEEEE;
+			}
+			
+			.invisibleTable, .invisibleTable th, .invisibleTable td {
+				border: none;
+				border-collapse: separate;
+				border-spacing: 0px 4px;
+				padding: 0px;
+			}
+			.invisibleTable {
+				/* Cancel out cell spacing at the top and bottom of the table */
+				margin-top: -4px;
+				margin-bottom: -4px;
+			}
+			
+			.fullCellWidth {
+				width: calc(100% - 4px);
+				display: inline-block;
+			}
+			.fullCellLabel {
+				width: calc(100% - (2*7px));
+				display: inline-block;
+				padding: 7px;
+			}
+			
+			#imgPreviewBox {
+				display: block;
+				width: 100%;
+				min-height: 100px;
+				border: 2px dashed #AAAAAA;
+				text-align: center;
+				padding: 0px;
+				margin: 0px;
+				line-height: 0px;
+			}
+			.imgPreview {
+				max-width: 100%;
+				padding: 0px;
+				margin: 0px;
+			}
+			
+			#errorBox {
+				color: red;
+				font-family: monospace;
+			}
+		</style>
+	</head>
+	
+	<body onload="OnLoad();">
+		<div id="container">
+			<h1>Assignment Submission GIF Generator</h1>
+			<div class="hLine">&nbsp;</div>
+			<h4>
+				Creates a file that shows a GIF (or other image) before redirecting to the assignment
+				<br>
+				Also supports offline assignments
+			</h4>
+			<center>
+				<p>You can use this when submitting assignments by email, or by a school or uni's student-website (eg. the ASMS Portal, Daymap, SEQTA, or Flinders Learning Online).</p>
+				<p>Make sure that there isn't any restriction on what sort of file can be submitted – eg. if only PDF files are allowed then this won't work, as this generates an HTML file (i.e. a simple webpage).</p>
+				<p>Submitting offline files using this program might be unreliable, as if the teacher has disabled certain browser features they won't be able to download it. Online files are pretty much guaranteed to work though.</p>
+				<p><i>Disclaimer: You should ensure that it works and that the teacher has new enough tech – I take no responsibility if it doesn't work or your teacher hates you afterwards.</i></p>
+			</center>
+			<div class="hLineB">&nbsp;</div>
+			<form>
+				<p>
+					<center>
+						<b>Assignment:</b>
+					</center>
+					
+					<table width="100%" class="niceTable">
+						<col width="50%">
+						<col width="50%">
+						<tr>
+							<th style="padding: 0px">
+								<label for="onlineRadioButton" class="fullCellLabel">
+									<input type="radio" id="onlineRadioButton" name="fileTypeSelector" checked="checked">Online</input>
+								</label>
+							</th>
+							<th style="padding: 0px">
+								<label for="offlineRadioButton" class="fullCellLabel">
+									<input type="radio" id="offlineRadioButton" name="fileTypeSelector">Offline</input>
+								</label>
+							</th>
+						</tr>
+						<tr>
+							<td>
+								<table width="100%" class="invisibleTable">
+									<tr>
+										<td>
+											<b>URL:</b>
+										</td>
+										<td>
+											<input type="text" id="assignmentUrlInput" name="assUrl" class="fullCellWidth"/>
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td>
+								<table width="100%" class="invisibleTable">
+									<tr>
+										<td style="width: calc(auto + 10px)">
+											<b>File from computer:</b>
+										</td>
+										<td>
+											<input type="file" id="assignmentFileInput" name="assFile" onchange="ReadSelectedFilesToProperty(event, null, null, null)"/>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Download dialog title:</b>
+										</td>
+										<td>
+											<input type="text" id="dlDialogTitle" name="dlDialogTitle" maxlength="80" value="Wondering where the assignment is?"/>
+										</td>
+									</tr>
+									<tr>
+										<td style="width: calc(auto + 10px)">
+											<b>Download dialog description:</b>
+										</td>
+										<td>
+											<textarea id="dlDialogDesc" name="dlDialogDesc" rows="3" value="">Now that you've witnessed this incredible GIF, click here to download my assignment:</textarea>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<b>Download button text:</b>
+										</td>
+										<td>
+											<input type="text" id="dlDialogButton" name="dlDialogButton" maxlength="30" value="Download"/>
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</p>
+				<p>
+					<table width="100%">
+						<col width="50%">
+						<col width="50%">
+						<tr>
+							<td>
+								<b>Assignment name:</b>
+							</td>
+							<td>
+								<input type="text" id="assignmentNameInput" name="name" style="width:100%"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Gif (or other image) file:</b>
+							</td>
+							<td>
+								<input type="file" id="imgFileInput" name="file" onchange="ReadSelectedFilesToProperty(event, 'imgPreviewBox', ImagePreviewDisplayer, false)"/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<b>Wait duration before downloading/redirecting:</b>
+							</td>
+							<td>
+								<input type="number" id="waitDurationInput" name="waitDuration" min="1" max="10"/>
+							</td>
+						</tr>
+					</table>
+				</p>
+				<p>
+					<h3>Selected image:</h3>
+					<output id="imgPreviewBox"></output>
+				</p>
+			</form>
+			<span id="errorBox"></span>
+			<p>
+				<center>
+					<button onclick="GenerateSubmission()">Generate GIFed Submission</button>
+				</center>
+			</p>
+			<br>
+		</div>
+		
+		
+		<script type="text/javascript">
+		
+		"use strict";
+		
+		function OnLoad() {
+			CheckFileAPI();
+			PrePopulateFormFromUrl();
+		}
+		
+		//This whole errors thing is a bit nasty but I can't think of a better way of doing the same thing,
+		//given that AFAIK javascript doesn't support out parameters (I could use tuples, but that's more
+		//effort than this and not much better anyway)
+		
+		function ClearErrors(category)
+		{
+			var errorList = document.getElementById('errorBox-category-' + category);
+			if (errorList !== undefined && errorList !== null) {
+				errorList.innerHTML = "";
+			}
+		}
+		
+		function CountErrors(category)
+		{
+			var errorList = document.getElementById('errorBox-category-' + category);
+			if (errorList === undefined || errorList === null) {
+				return 0;
+			} else {
+				return errorList.childElementCount;
+			}
+		}
+		
+		function ShowError(category, message)
+		{
+			var errorList = document.getElementById('errorBox-category-' + category);
+			
+			if (errorList === undefined || errorList === null) {
+				PrintErrorToNewList(category, message)
+			} else {
+				PrintErrorToList(errorList, message)
+			}
+		}
+		
+		function PrintErrorToList(errorList, message)
+		{
+			var errorSpan = document.createElement('span');
+			
+			if (errorList.childElementCount > 0) {
+				errorList.insertBefore(document.createElement('br'), null);
+			}
+			errorList.insertBefore(errorSpan, null);
+			
+			errorSpan.outerHTML = (
+				'<span class="errorMessage" >ERROR: ' + message + '</span>'
+			);
+		}
+		
+		function PrintErrorToNewList(category, message)
+		{
+			var errorBox = document.getElementById('errorBox');
+			
+			var errorList = document.createElement('span');
+			if (errorList.childElementCount > 0) {
+				errorBox.insertBefore(document.createElement('br'), null);
+			}
+			errorBox.insertBefore(errorList, null);
+			
+			errorList.outerHTML = (
+				'<span '
+				+ 'class="errorList" '
+				+ 'id="errorBox-category-' + category + '"'
+				+ '>'
+				+ FormatErrorSpan(message)
+				+ '</span>'
+			);
+		}
+		
+		function FormatErrorSpan(message)
+		{
+			return '<span class="errorMessage" >ERROR: ' + message + '</span>';
+		}
+		
+		/**
+		 * Check for the various File API support.
+		 */
+		function CheckFileAPI() {
+			if (window.File && window.FileReader && window.FileList && window.Blob) {
+				return true; 
+			} else {
+				alert('The File APIs are not fully supported by your browser. Fallback required.');
+				return false;
+			}
+		}
+		
+		//This works for multiple files, but currently we're limiting the input to just one file
+		//Keep the multi-file capability in case it's needed in future
+		function ReadSelectedFilesToProperty(evt, previewBoxID, previewDisplayer, keepPrevPreview)
+		{
+			evt.target.readFiles = []; //Setup array or clear previous files
+			evt.target.numFilesLoading = 0; //Same idea
+			
+			//Clear preview previews if applicable
+			var previewBox = null;
+			if (!StringIsEmpty(previewBoxID)) {
+				previewBox = document.getElementById(previewBoxID);
+				if (!keepPrevPreview) {				
+					previewBox.innerHTML = "";
+				}
+			}
+			
+			var files = evt.target.files; // FileList object
+			
+			// Loop through the FileList and render image files as thumbnails.
+			for (var i = 0, f; f = files[i]; i++)
+			{
+				evt.target.numFilesLoading += 1;
+				
+				var reader = new FileReader();
+				
+				// Closure to capture the file information.
+				reader.onload = (function(theFile) {
+					return function(e) {
+						evt.target.readFiles.push(e.target.result);
+						evt.target.numFilesLoading -= 1;
+						
+						// Render preview if applicable
+						// Do this last in case it throws an error
+						if (!IsNullOrUndef(previewDisplayer)) {
+							previewDisplayer(previewBox, theFile, e);
+						}
+					};
+				})(f);
+				
+				// Read in the image file as a data URL.
+				reader.readAsDataURL(f);
+			}
+		}
+		
+		function ImagePreviewDisplayer(previewBox, file, fileReadEvent)
+		{
+			var img = document.createElement('img');
+			previewBox.insertBefore(img, null);
+			
+			img.outerHTML = (
+				'<img '
+				+ 'class="imgPreview" '
+				+ 'src="' + fileReadEvent.target.result + '" '
+				+ 'title="' + escape(file.name) + '"'
+				+ '/>'
+			);
+		}
+		
+		//document.getElementById('fileInput').addEventListener('change', HandleFileSelect, false);
+		
+		function GenerateSubmission()
+		{
+			//Error category:
+			var errorCat = 'generate-submission';
+			
+			ClearErrors(errorCat);
+			
+			var assignmentName = GetAssignmentName(errorCat);
+			var img = GetSubmittedImage(errorCat);
+			var waitDuration = GetWaitDuration(errorCat);
+			
+			var isOfflineAssignment = document.getElementById('offlineRadioButton').checked;
+			
+			//The url used in the generated file. Used in the same way for both online and offline assignments (just created differently).
+			var linkUrl;
+			
+			//These only apply to offline assignments:
+			var assignmentFilename, dlDialogTitle, dlDialogDesc, dlDialogButton;
+			
+			if (isOfflineAssignment)
+			{
+				linkUrl = GetOfflineAssignmentLinkUrl(errorCat);
+				assignmentFilename = document.getElementById('assignmentFileInput').files[0].name;
+				dlDialogTitle = document.getElementById('dlDialogTitle').value;
+				dlDialogButton = document.getElementById('dlDialogButton').value;
+				dlDialogDesc = GetDlDialogDesc(errorCat);
+			}
+			else
+			{
+				linkUrl = GetOnlineAssignmentLinkUrl(errorCat);
+				assignmentFilename = null;
+				dlDialogTitle  = null;
+				dlDialogDesc   = null;
+				dlDialogButton = null;
+			}
+			
+			if (CountErrors(errorCat) > 0) {
+				return;
+			}
+			
+			//TODO: Download dialog contents
+			
+			SaveAsFile(
+				assignmentName + ".html",
+				MakeSubmissionFile(
+					assignmentName,
+					linkUrl,
+					img,
+					isOfflineAssignment,
+					assignmentFilename,
+					dlDialogTitle,
+					dlDialogDesc,
+					dlDialogButton,
+					waitDuration
+				)
+			)
+		}
+		
+		function GetAssignmentName(errorCategory)
+		{
+			var assignmentName = document.getElementById('assignmentNameInput').value;
+			
+			if (StringIsEmpty(assignmentName)) {
+				ShowError(errorCategory, 'No assignment name has been provided');
+				return;
+			}
+			
+			return assignmentName;
+		}
+		
+		function GetWaitDuration(errorCategory)
+		{
+			var waitDurationInput = document.getElementById('waitDurationInput');
+			var waitDuration = waitDurationInput.value + ""; //ensure it's a string just in case
+			
+			if (StringIsEmpty(waitDuration)) {
+				ShowError(errorCategory, 'No wait duration has been provided');
+				return;
+			}
+			if (waitDuration.match(/\D/g)) {
+				ShowError(
+					errorCategory,
+					'Invalid wait duration "' + waitDuration + '" - must be a whole number between 1 and 10 inclusive.'
+				);
+				return;
+			}
+			var waitDurationInt = Number(waitDuration);
+			if (waitDurationInt < 1 || waitDurationInt > 10) {
+				ShowError(
+					errorCategory,
+					'Invalid wait duration "' + waitDuration + '" - must be a whole number between 1 and 10 inclusive.'
+				);
+				return;
+			}
+			return Number(waitDuration);
+		}
+		
+		function GetOnlineAssignmentLinkUrl(errorCategory)
+		{
+			var assignmentUrlEl = document.getElementById('assignmentUrlInput');
+			var assignmentUrl = assignmentUrlEl.value;
+			if (StringIsEmpty(assignmentUrl)) {
+				ShowError(errorCategory, 'Online mode is selected but no assignment URL has been provided');
+				return;
+			}
+			
+			return assignmentUrl;
+		}
+		
+		function GetOfflineAssignmentLinkUrl(errorCategory)
+		{
+			var assignmentFileEl = document.getElementById('assignmentFileInput');
+			
+			if (assignmentFileEl.numFilesLoading > 1 || (!IsNullOrUndef(assignmentFileEl.readFiles) && assignmentFileEl.readFiles.length > 1)) {
+				//This should be impossible but just in case:
+				ShowError(errorCategory, 'Cannot combine more than one file into a single submission');
+				return;
+			}
+			if (assignmentFileEl.numFilesLoading > 0) {
+				ShowError(errorCategory, 'Waiting for the assignment file to load, please try again');
+				return;
+			}
+			if (ArrayIsEmpty(assignmentFileEl.readFiles)) {
+				ShowError(errorCategory, 'Offline mode is selected but no assignment file has been provided');
+				return;
+			}
+			
+			return assignmentFileEl.readFiles[0];
+		}
+		
+		function GetDlDialogDesc(errorCategory)
+		{
+			var orig = document.getElementById('dlDialogDesc').value;
+			return orig.replace(/(\r\n|\r|\n)/g, "<br>");
+		}
+		
+		function GetSubmittedImage(errorCategory)
+		{
+			var imgFileEl = document.getElementById('imgFileInput');
+			
+			if (imgFileEl.numFilesLoading > 1 || (!IsNullOrUndef(imgFileEl.readFiles) && imgFileEl.readFiles.length > 1)) {
+				//This should be impossible but just in case:
+				ShowError(errorCategory, 'Multiple images for a single sumbission is not supported :(');
+				return;
+			}
+			if (imgFileEl.numFilesLoading > 0) {
+				ShowError(errorCategory, 'Waiting for the image file to load, please try again');
+				return;
+			}
+			if (ArrayIsEmpty(imgFileEl.readFiles)) {
+				ShowError(errorCategory, 'No image has been provided');
+				return;
+			}
+			
+			return imgFileEl.readFiles[0];
+		}
+		
+		//https://docs.google.com/document/d/1f4VS4u-Xs0yBqs7RGtiHpe8QeO9g8VQcKO4sL8Kfq9E/edit?usp=sharing
+		//
+		
+		//Interesting approach to automatic downloads (doesn't actually seem to help but good to keep the link):
+		//https://stackoverflow.com/questions/156686/how-to-start-automatic-download-of-a-file-in-internet-explorer
+		
+		function MakeSubmissionFile(assignmentName, linkUrl, image, isOfflineAssignment, dlFileName, dlDialogTitle, dlDialogDesc, dlDialogButton, waitDuration) {
+			return [
+				'<html>',
+					'<head>',
+						'<title>' + assignmentName + '</title>',
+						(isOfflineAssignment ? "" : ('<meta http-equiv="refresh" content="' + waitDuration + '; url=' + linkUrl + '"/>')),
+						'<style>',
+							'body{border:0;margin:0;padding:0;vertical-align:baseline;line-height:1;font:600 18px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}.downloadButton{padding:.95em 3em 1.05em;border-radius:6px;border:none;text-decoration:none;background-color:#4cc713;color:#fff}@keyframes fadeInDownloadDialog{0%{pointer-events:none;opacity:0}99%{pointer-events:auto}100%{pointer-events:auto;opacity:1}}.download-dialog{position:absolute;top:50%;left:50%;-ms-transform:translateX(-50%) translateY(-50%);-webkit-transform:translate(-50%,-50%);-moz-transform:translate(-50%,-50%);-o-transform:translate(-50%,-50%);transform:translate(-50%,-50%);background-color:#fff;background-color:rgba(255,255,255,.9);box-shadow:0 4px 8px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);opacity:1;pointer-events:auto;animation-name:fadeInDownloadDialog;animation-duration:.3s;animation-delay:' + waitDuration + 's;animation-fill-mode:backwards;-webkit-transition:opacity .3s;-moz-transition:opacity .3s;-o-transition:opacity .3s;transition:opacity .3s;width:400px;color:#444;border-radius:6px;padding:2rem}#open-download:target~.download-dialog{opacity:1;pointer-events:auto;animation:none}#close-download:target~.download-dialog{opacity:0;pointer-events:none;animation:none}.download-dialog header{font-weight:700}.download-dialog-close{color:#999;line-height:50px;font-size:80%;position:absolute;right:0;text-align:center;top:0;width:70px;text-decoration:none}.download-dialog-close:hover{color:#000}.download-dialog h1{font-size:150%;margin:0 0 15px}',
+						'</style>',
+					'</head>',
+					'<body style="background-image: url(' + image + ');">',
+						'<div style="position: fixed; margin: 10px; font-size: 0.7em">',
+							'<a href="' + linkUrl + '" '
+							+ (isOfflineAssignment ? ('download="' + dlFileName + '"') : '')
+							+ '>',
+								(isOfflineAssignment ? 'Download Assignment' : 'Manually Redirect To Assignment'),
+							'</a>',
+							(isOfflineAssignment ? '<br>' : ""),
+							(isOfflineAssignment ? '<a href="#open-download">Open Download Dialog</a>' : ""),
+						'</div>',
+						(isOfflineAssignment ? [
+							'<span id="open-download"></span>',
+							'<span id="close-download"></span>',
+							'<div class="download-dialog">',
+								'<a href="#close-download" title="Close" class="download-dialog-close">Close</a>',
+								'<h1>',
+									(dlDialogTitle || 'Wondering where the assignment is?'),
+								'</h1>',
+								'<p style="margin-bottom: 2rem">',
+									(dlDialogDesc || 'Now that you\'ve witnessed this incredible GIF, click here to download my assignment:'),
+								'</p>',
+								'<p>',
+									'<a class="downloadButton" href="' + linkUrl + '" download="' + dlFileName + '">',
+										(dlDialogButton || 'Download'),
+									'</a>',
+								'</p>',
+							'</div>'
+						].join('\n') : ""),
+					'</body>',
+				'</html>'
+			].join('\n');
+		}
+		
+		function SaveAsFile(filename, data) {
+			var blob = new Blob([data], {type: 'text/csv'});
+			if(window.navigator.msSaveOrOpenBlob) {
+				window.navigator.msSaveBlob(blob, filename);
+			}
+			else{
+				var elem = window.document.createElement('a');
+				elem.href = window.URL.createObjectURL(blob);
+				elem.download = filename;        
+				document.body.appendChild(elem);
+				elem.click();
+				document.body.removeChild(elem);
+			}
+		}
+		
+		//From https://stackoverflow.com/a/5422377/4149474
+		function GetUrlVars()
+		{
+			var vars = []
+			var separatorIndex = window.location.href.indexOf('?');
+			if (separatorIndex < 0) {
+				return vars;
+			}
+			var hashes = window.location.href.slice(separatorIndex + 1).split('&');
+			console.log(window.location.href.slice(window.location.href.indexOf('?') + 1));
+			console.log(hashes);
+			for (var i = 0; i < hashes.length; i++)
+			{
+				let hash = hashes[i].split('=');
+				vars.push({varName: hash[0], value: DecodeURLVar(hash[1])});
+			}
+			
+			return vars;
+		}
+		
+		//This also handles '+' characters, which decodeURIComponent() and decodeURI() don't seem to
+		function DecodeURLVar(encoded) {
+			return decodeURIComponent(encoded.replace(/\%2B/g, '%252B')).replace(/\+/g, ' ').replace(/\%2B/, '+');
+		}
+		
+		function PrePopulateFormFromUrl() {
+			var urlVars = GetUrlVars();
+			
+			for (var i = 0, v; v = urlVars[i]; i++) {
+				document.getElementsByName(v.varName)[0].value = v.value;
+			}
+		}
+		
+		function StringIsEmpty(str) {
+			return str === null || str === undefined || str === "";
+		}
+		
+		function ArrayIsEmpty(arr) {
+			return arr === null || arr === undefined || arr.length === 0;
+		}
+		
+		function IsNullOrUndef(x) {
+			return x === null || x === undefined;
+		}
+		
+		</script>
+		
+	</body>
+</html>
