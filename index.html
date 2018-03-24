@@ -159,6 +159,7 @@
 									<tr>
 										<td>
 											<b>URL:</b>
+											<span style="float: right; color: #777">http://&nbsp;&nbsp;</div>
 										</td>
 										<td>
 											<input type="text" id="assignmentUrlInput" name="assUrl" class="fullCellWidth"/>
@@ -509,7 +510,13 @@
 				return;
 			}
 			
-			return assignmentUrl;
+			//Remove protocol to avoid getting stuff like http://http://site.com
+			//Protocols other than http probably won't work anyway, and any that do should be uncommon
+			//Note: http will usually get changed to https automatically, and if not, the site should have
+			//an http version as well, so here just using http should be fine
+			var urlWithoutProtocol = assignmentUrl.replace(/^\w+\:\/+/, "");
+			
+			return "http://" + urlWithoutProtocol;
 		}
 		
 		function GetOfflineAssignmentLinkUrl(errorCategory)
